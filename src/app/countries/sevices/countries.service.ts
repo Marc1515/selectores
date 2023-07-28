@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, of, tap } from 'rxjs';
+import { Observable, combineLatest, map, of, tap } from 'rxjs';
 
 import { Country, Region, SmallCountry } from '../interfaces/countries.interface';
 
@@ -12,7 +12,7 @@ export class CountriesService {
   private baseUrl: string = 'https://restcountries.com/v3.1'
 
 
-  private _regions: Region[] = [ Region.Africa, Region.Americas, Region.Asia, Region.Europa, Region.Oceania ];
+  private _regions: Region[] = [ Region.Africa, Region.Americas, Region.Asia, Region.Europe, Region.Oceania ];
 
   constructor(
     private http: HttpClient
@@ -40,5 +40,36 @@ export class CountriesService {
 
   }
 
+  getCountryByAlphaCode( alphaCode: string ): Observable<SmallCountry> {
+
+    const url = `${ this.baseUrl }/alpha/${alphaCode}?fields=cca3,name,borders`;
+
+    return this.http.get<Country>(url)
+      .pipe(
+        map( country => ({
+          name: country.name.common,
+          cca3: country.cca3,
+          borders: country.borders ?? []
+        }))
+      )
+
+  }
+
+  getCountryBordersByCodes( borders: string[] ): Observable<SmallCountry[]> {
+
+    if ( !borders || borders.length === 0) return of ([]);
+
+    /* Si vienen N número de paises se crea el listado de Observables con cada uno de los paises */
+
+    const countriesRequest: Observable<SmallCountry> [] = [];
+
+    borders.forEach( code => {
+      const request = this.getCountryByAlphaCode( code );
+      countriesRequest.push( request )
+    })
+
+    return combineLatest( countriesRequest )
+
+  }
 
 }
