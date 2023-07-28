@@ -1,0 +1,25 @@
+<p>selector-page works!</p>
+<hr>
+
+<form [formGroup]="myForm">
+
+  <!-- Region -->
+  <div class="row mb-3">
+    <div class="col">
+      <label class="formlabel">Continente</label>
+      <select formControlName="region" class="form-control">
+        <option value="">-- Seleccione Continente --</option>
+        <option value="Africa">Africa</option>
+      </select>
+    </div>
+  </div>
+
+</form>
+
+<h3>Formulario</h3>
+<code>
+  {{ myForm.value | json }}
+</code>
+<p>
+  is form valid: {{ myForm.valid }}
+</p>
